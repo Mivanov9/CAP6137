@@ -51,15 +51,26 @@ ivanovmichael@ufl.edu}
     \subsection{Anti-disassembly}
 
     \section{Dynamic Analysis}
+
     \subsection{Interesting behaviors}
     When the program is first executed it immediately deletes itself. However, by using Procmon I was able to see the program was still running. It was now in the \path{C:/Users/malware/AppData/Roaming} directory.
     \begin{figure}[h]
         \includegraphics[width=\textwidth]{sample2process.png}
         \caption{Procmon showing the process tree of sample2.exe}
     \end{figure}
+
     \subsection{Contacted machines and services}
+    \begin{itemize}
+        \item HTTP GET \url{http://myexternalip.com/raw}
+    \end{itemize}
+    The above URL obtains the machine's external IP address. This may determine program behavior based on said IP address.
+    \begin{figure}[h]
+        \includegraphics[width=\textwidth]{wireshark.png}
+        \caption{Wireshark showing the http get request from the above URL }
+    \end{figure}
+
     \subsection{Registry Keys created/modified}
-    Created Keys:
+    No registry keys were created or modified. However, the following key would have been created if it did not exist already.
     \begin{itemize}
         \item \path{HKLM\System\CurrentControlSet\Services\Tcpip\Parameters}
     \end{itemize}
@@ -67,25 +78,32 @@ ivanovmichael@ufl.edu}
         \includegraphics[width=\textwidth]{RegKeyCreate.png}
         \caption{Procmon showing the attempted creation of a registry key}
     \end{figure}
+
     \subsection{Files created/modified}
     Files Created:
+
+
+    All instances of sample2.exe share the same hash
     \begin{itemize}
-        \item \path{C:\Windows\System32\imm32.dll}
-        \item \path{C:\Windows\System32\sechost.dll}
-        \item \path{C:\Windows\System32\winhttp.dll}
-        \item \path{C:\Windows\System32\webio.dll}
-        \item \path{C:\Windows\System32\IPHLPAPI.dll}
-        \item \path{C:\Windows\System32\winnsi.dll}
-        \item \path{C:\Windows\System32\rpcss.dll}
-        \item \path{C:\Windows\System32\cryptbase.dll}
-        \item \path{C:\Windows\System32\ncrypt.dll}
-        \item \path{C:\Windows\System32\bcrypt.dll}
-        \item \path{C:\Windows\Globaliztion\SortDefault.nls}
         \item \path{C:\Users\malware\AppData\Roaming\sample2.exe}
-        \item \path{C:\Windows\System32\apphelp.dll}
-        \item \path{C:\Windows\AppPatch\sysmain.sdb}
+        \item \path{C:\Users\System32\config\systemprofile\AppData\Roaming\sample2.exe}
+        \item \path{C:\Users\System32\config\systemprofile\AppData\Roaming\client_id}
+        \item \path{C:\Users\System32\config\systemprofile\AppData\Roaming\group_tag}
+        \item \path{C:\Users\System32\config\systemprofile\AppData\Roaming\Modules}
     \end{itemize}
+    \begin{figure}[h]
+        \includegraphics[width=\textwidth]{fileContents.png}
+        \caption{The contents of the two new created files}
+    \end{figure}
     \subsection{Processes started}
+    \begin{itemize}
+        \item \path{C:\Users\malware\AppData\Roaming\sample2.exe}
+        \item \path{C:\Users\System32\config\systemprofile\AppData\Roaming\sample2.exe}
+    \end{itemize}
+    \begin{figure}[h]
+        \includegraphics[width=\textwidth]{processCreated.png}
+        \caption{Procmon showing the processes created by sample2.exe}
+    \end{figure}
     \subsection{Persistence}
 
 \end{document}
