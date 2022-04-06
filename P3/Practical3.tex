@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{biblatex}
+\addbibresource{ref.bib}
+\graphicspath{{./images}}
+\title{Analysis of Sample3.exe \\Practical Assignment 3\\Malware Reverse Engineering \\
+CAP6137}
+\author{Michael Ivanov \\
+ivanovmichael@ufl.edu}
+\date{March 14, 2022}
+
+\begin{document}
+    \maketitle
+    \pagebreak
+    \section{Executive Summary}
+    \pagebreak
+    \section{Static Analysis}
+    \subsection{Compilation date}
+    \begin{itemize}
+        \item Sample3.exe: Fri Mar 04, 07:51:31 2022
+    \end{itemize}
+    \subsection{Suspicious Imports}
+    One thing to note is that according to Pestudio 44 imports are referenced by ordinal.
+    \begin{itemize}
+        \item \textbf{RegCreateKeyA, RegDeleteValueA, RegSetValueA, RegDeleteKeyA}: these are indicators the malware will probably be modifying the registry.
+        \item \textbf{FindFirstFileA, UnlockFile, LockFile, DeleteFileA, MoveFileA}: various file operations
+        \item \textbf{GetAtomNameA, GlobalGetAtomNameA, GlobalFindAtomA, GlobalAddAtomA, GlobalDeleteAtom}: Possible dynamic data exchange, which allows for different processes to communicate with each other. \cite{atom}
+        \item \textbf{RegisterClipboardFormatA,} \textbf{OleSetClipboardFormatA,} \textbf{OleFlushClipboard}: various clipboard operations.
+    \end{itemize}
+    \subsection{Suspicious strings}
+    \pagebreak
+    \printbibliography
+\end{document}
