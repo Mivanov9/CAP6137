@@ -5,11 +5,12 @@
 \usepackage{biblatex}
 \addbibresource{ref.bib}
 \graphicspath{{./images}}
-\title{Analysis of Sample3.exe \\Practical Assignment 3\\Malware Reverse Engineering \\
+\title{Analysis of Sample3.dll \\Practical Assignment 3\\Malware Reverse Engineering \\
 CAP6137}
 \author{Michael Ivanov \\
 ivanovmichael@ufl.edu}
 \date{March 14, 2022}
+\hfuzz=30pt
 
 \begin{document}
     \maketitle
@@ -17,12 +18,17 @@ ivanovmichael@ufl.edu}
     \section{Executive Summary}
     \pagebreak
     \section{Static Analysis}
+    \subsection{MD5 Hashes}
+    \begin{itemize}
+        \item sample3.dll: 3AC8BFD8DA5D3C4789D1F5D26E0E082B
+        \item unknown resource: 30245F444D61C3C8780A7058381E140A
+    \end{itemize}
     \subsection{Compilation date}
     \begin{itemize}
-        \item Sample3.exe: Fri Mar 04, 07:51:31 2022
+        \item Sample3.dll: Fri Mar 04, 07:51:31 2022
     \end{itemize}
     \subsection{Suspicious Imports}
-    One thing to note is that according to Pestudio 44 imports are referenced by ordinal.
+    One thing to note is that according to Pestudio, 44 imports are referenced by ordinal.
     \begin{itemize}
         \item \textbf{RegCreateKeyA, RegDeleteValueA, RegSetValueA, RegDeleteKeyA}: these are indicators the malware will probably be modifying the registry.
         \item \textbf{FindFirstFileA, UnlockFile, LockFile, DeleteFileA, MoveFileA}: various file operations
@@ -30,6 +36,40 @@ ivanovmichael@ufl.edu}
         \item \textbf{RegisterClipboardFormatA,} \textbf{OleSetClipboardFormatA,} \textbf{OleFlushClipboard}: various clipboard operations.
     \end{itemize}
     \subsection{Suspicious strings}
+    The following strings start with \url{f:\dd\vctools\vc7libs\ship\atlmfc\src\mfc}
+    \begin{itemize}
+        \item \url{dockcont.cpp}, \url{filecore.cpp}, \url{\winctrl2.cpp}, \url{appcore.cpp}, \url{aucdata.cpp}, \url{olefact.cpp}, \url{olestrm.cpp}
+    \end{itemize}
+    The following strings start with \url{f:\dd\vctools\vc7libs\ship\atlmfc\include}
+    \begin{itemize}
+        \item \url{afxwin1.inl}, \url{afxwin2.inl}
+    \end{itemize}
+    Potential format strings for shell commands:
+    \begin{itemize}
+        \item \url{%s\shell\open\%s}
+        \item \url{%s\shell\print\%s}
+        \item \url{%s\shell\printto\%s}
+        \item \url{%s\ShellNew}
+    \end{itemize}
+    A format string for a dll file:
+    \begin{itemize}
+        \item \url{%s%s.dll}
+    \end{itemize}
+    \subsection{Program Sections}
+    In the resource section (\url{.rsrc}) there is an unknown file. I've provided the hash above. The file seems to be encoded.
+    \subsection{Anti-disassembly}
+    \subsection{Obfuscation}
+    \pagebreak
+    \section{Dynamic Analysis}
+    \subsection{Interesting behaviors}
+    \subsection{Networking activity}
+    \subsection{Registry keys created or modified}
+    \subsection{Files created or modified}
+    \subsection{Processes started}
+    \subsection{Persistence}
+    \subsection{De-obfuscation}
+    \pagebreak
+    \section{Indicators of Compromise}
     \pagebreak
     \printbibliography
 \end{document}
