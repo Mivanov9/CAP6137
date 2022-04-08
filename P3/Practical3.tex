@@ -22,6 +22,7 @@ ivanovmichael@ufl.edu}
     \begin{itemize}
         \item sample3.dll: 3AC8BFD8DA5D3C4789D1F5D26E0E082B
         \item unknown resource: 30245F444D61C3C8780A7058381E140A
+        \item DLLLoader32: 785A5D947C2B4E5C2B1D7314F5D97A0A
     \end{itemize}
     \subsection{Compilation date}
     \begin{itemize}
@@ -63,7 +64,29 @@ ivanovmichael@ufl.edu}
     \section{Dynamic Analysis}
     \subsection{Interesting behaviors}
     \subsection{Networking activity}
+    The following are network traffic found by running sample3.dll on ordinal 1:
+    \begin{itemize}
+        \item 51.75.33.122:https
+        \item 186.250.45.5:http
+        \item 168.119.39.118:https
+    \end{itemize}
     \subsection{Registry keys created or modified}
+    Registry keys modified:
+    \begin{itemize}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Connections\SavedLegacySettings}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\ProxyBypass}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\UNCAsIntranet}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\AutoDetect}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\ZoneMap\IntranetName}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\00-50-56-87-c7-d5\WpadDecisionReason}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\00-50-56-87-c7-d5\WpadDecisionTime}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\00-50-56-87-c7-d5\WpadDecision}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\00-50-56-87-c7-d5\WpadDetectedUrl}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\{082A014B-1185-406F-8FE4-BB152F2E1081}\WpadDecisionReson}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\{082A014B-1185-406F-8FE4-BB152F2E1081}\WpadDecisionTime}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\{082A014B-1185-406F-8FE4-BB152F2E1081}\WpadDecision}
+        \item \url{HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings\Wpad\{082A014B-1185-406F-8FE4-BB152F2E1081}\WpadNetworkName}
+    \end{itemize}
     \subsection{Files created or modified}
     \subsection{Processes started}
     \subsection{Persistence}
