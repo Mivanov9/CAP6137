@@ -18,6 +18,48 @@ ivanovmichael@ufl.edu}
     \section{Executive Summary}
     \pagebreak
     \section{Static Analysis}
+    \subsection{MD5 Hashes}
+    \begin{itemize}
+        \item NetWireRat.exe: 1D7FFEE59EA65A8E19F28BAF72F581F4
+    \end{itemize}
+    \subsection{Compilation date}
+    \begin{itemize}
+        \item NetWireRat.exe: Sat Apr 04 14:56:51 2015
+    \end{itemize}
+    \subsection{Suspicious Imports}
+    Libraries
+    \begin{itemize}
+        \item crypt32.dll
+        \item ws2\textunderscore32.dll
+    \end{itemize}
+    Functions
+    \begin{itemize}
+        \item \textbf{socket, closesocket, connect, send, gethostname}: Various socket related functions.
+        \item \textbf{WriteFile, MoveFileA, DeleteFileA, FindFirstFileA, FindNextFileA}: File operations.
+        \item \textbf{RegDeleteKeyA, RegDeleteValueA, RegSetValueA}: registry operations.
+        \item \textbf{CryptCreateHash, CryptHashData, CryptDestroyHash}: various cryptographic functions related to hashing.
+        \item \textbf{OpenProcess, GetCurrentProcessId, Process32First, Process32next, TerminateProcess} various process related functions.
+    \end{itemize}
+    \subsection{Suspicious strings}
+    \begin{itemize}
+        \item \url{@echo off\r\nping 192.0.2.2 -n 1 -w %d >nul 2>&1\r\nDEL /s "%s" >nul 2>&1\r\ncall :deleteSelf&exit /b\r\n:deleteSelf\r\nstart /b "" cmd /c del "%%~f0"&exit /b\r\n}: A shell script.
+        \item \url{FCONNECT %s:%d HTTP/1.0\r\nHost: %s:%d\r\n\r\n}
+        \item \url{%s\Google\Chrome\User Data\Default\Login Data} a format string with a path to some login data for Google Chrome.
+        \item \url{%s\Opera Software\Opera Stable\Login Data}
+        \item \url{$s\Chrominum\User Data\Default\Login Data}
+        \item \url{%s\Mozilla\SeaMonkey\profiles.ini}
+        \item \url{$s\Mozilla\Firefox\profiles.ini}
+        \item \url{%s\Opera\Opera\profile\wand.dat}
+        \item \url{SOFTWARE\Mozilla\$s\%s\Main}
+        \item \url{%s\Thunderbird\profiles.ini}
+        \item \url{$s\system32\cmd.exe}
+        \item \url{sqlite3 column text}
+        \item \url{select * from moz logins}
+    \end{itemize}
+    \subsection{Program Sections}
+    Nothing suspicious found with the program sections.
+    \subsection{Anti-disassembly}
+    \subsection{Anti-debugging}
     \pagebreak
     \section{Dynamic Analysis}
     \pagebreak
