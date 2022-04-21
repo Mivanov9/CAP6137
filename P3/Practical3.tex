@@ -16,12 +16,17 @@ ivanovmichael@ufl.edu}
     \maketitle
     \pagebreak
     \section{Executive Summary}
+    This malware belongs to the \textit{Emotet} family, a banking Trojan\cite{emotet}. Analysis was challenging due to the large amount of obfuscation. Static analysis provided shows us some anti-debugging techniques to watch out for later. I found 5 different entry points using \textit{IDA Pro}, 3 of them were duplicates and had no interesting code. I focused most of my attention on the \textit{DllEntryPoint} as it was the most interesting. Obfuscation included indirect calls and large amounts of data manipulation.
+
+    Using dynamic analysis I was able to de-obfuscate many library functions used and resolved any functions called with \textit{GetProcAddress}. Because of the numerous calls to \textit{VirtualAlloc} I decided to dump the memory and was able to find a DLL. Looking online this appears to be a common behavior for an \textit{Emotet} family malware. Due to time constraints, I was not able to analyze this dll, but I provided the hashes below. The malware communicates over the network using HTTP/HTTPS traffic.
     \pagebreak
     \section{Static Analysis}
     \subsection{MD5 Hashes}
     \begin{itemize}
         \item sample3.dll: 3AC8BFD8DA5D3C4789D1F5D26E0E082B
         \item unknown resource: 30245F444D61C3C8780A7058381E140A
+        \item Virtual allocate dump: D1B9580B68E7A5E5E6792FC5AAF0E593
+        \item Virtual allocate dump 2: 481B91ABB4C17C830A779D1302794CD8
     \end{itemize}
     \subsection{Compilation date}
     \begin{itemize}
@@ -62,7 +67,7 @@ ivanovmichael@ufl.edu}
         \includegraphics[width=\textwidth]{dllentrypoints.png}
         \caption{List of all exports for sample3.dll using \textit{Ida Pro}}
     \end{figure}
-    Using Ghidra I was able to determine that ordinal 1 entry point \textit{DLLRegisterServer} was the most interesting. The rest of the entry points were duplicates of each other and did not do anything.
+    Using Ghidra I was able to determine that ordinal 1 entry point \textit{DLLRegisterServer} was the most interesting out of the ordinals. The rest were duplicates of each other and did not do anything. However the entry point \textit{DLLEntryPoint} was the most interesting, and most of the report will be focused on analyzing this entry point.
     \begin{figure}[H]
         \includegraphics[width=\textwidth]{export1.png}
         \caption{Ordinal 1 entry point \textit{DLLRegisterServer}}
@@ -87,11 +92,27 @@ ivanovmichael@ufl.edu}
     In the \textit{DLLEntryPoint} there are numerous examples of obfuscation of data. Below is an example found in DLLMain:
     \begin{figure}[H]
         \includegraphics[width=\textwidth]{obfex.png}
-        \caption{Example of obfuscation of data}
+        \caption{Example of obfuscation in DLLMain}
     \end{figure}
     \pagebreak
     \section{Dynamic Analysis}
     \subsection{Interesting behaviors}
+    This malware has lots of deobfuscation, making static analysis challenging. The malware uses a few different anti-debugging techniques as discussed below. I was able to make a pop-up screen to appear by manually changing a control flow bit in x32dbg to continue executing a function.
+
+    By dumping the memory after a call to VirtualAlloc I was able to extract a Dll. I provided the hash above.
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{virtalloc.png}
+        \caption{The call to VirtualAlloc at RVA 3ABF}
+    \end{figure}
+    By using the value in EDX I was able to dump the memory into a file:
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{dump.png}
+        \caption{Extracting the memory to a file}
+    \end{figure}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{hxdump.png}
+        \caption{A quick look at the binary}
+    \end{figure}
     \subsection{Networking activity}
     The following are network traffic found by running sample3.dll on ordinal 1:
     \begin{itemize}
@@ -126,10 +147,62 @@ ivanovmichael@ufl.edu}
         \includegraphics[width=\textwidth]{regkeyset.png}
         \caption{Example registry key activity shown by \textit{Procmon}}
     \end{figure}
+    \subsection{Functions found through debugging}
+    Functions found by tracing \url{eip < addr1 || eip >= addr2}
+    Where addr1 and addr2 are the bounds to the program text section.
+    \begin{itemize}
+        \item Function Name: RVA
+        \item HeapCreate
+        \item GetModuleHandleW: 50297, 4FE05
+        \item FlsAlloc: 502BE
+        \item FlsGetValue: 502CB
+        \item FlsSetValue: 502D8
+        \item FlsFree: 502E5
+        \item TlsAlloc: 50335
+        \item TlsSetValue: 50350
+        \item TlsGetValue: 4fDD8
+        \item EncodePointer: 4FE20
+        \item ZwQueryInformationProcess: 4FE2D
+        \item GetCommandLineA: 4774D
+        \item GetEnvironmentStringsW: 5358B
+        \item WideCharToMultiByte: 53600
+        \item RtlAllocateHeap: 474E6
+        \item FreeEnvironmentStringsW: 53639
+        \item GetStartupInfoA: 52F9E
+        \item GetStdHandle: 53152
+        \item SetHandleCount: 531BC
+        \item GetLastError: 50055
+        \item SetlastError: 500BF
+        \item RtlEnterCriticalSection: 509D6
+        \item RtlLeaveCriticalSection: 508C9
+        \item GetACP: 57E26
+    \end{itemize}
+    The following are functions resolved from \url{GetProcAddress}:
+    \begin{itemize}
+        \item FlsAlloc
+        \item FlsGetValue
+        \item FlsSetValue
+        \item FlsFree
+        \item EncodePointer
+        \item DecodePointer
+        \item IsProcessorFeaturePresent
+    \end{itemize}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{resolveprocaddress.png}
+        \caption{Example function being resolved from \textit{GetProcAddress}}
+    \end{figure}
     \subsection{Files created or modified}
+    No files were created or modified.
     \subsection{Processes started}
+    No processes were started, below are some threads that were created:
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{threads.png}
+        \caption{Threads started by \textit{sample3.dll}}
+    \end{figure}
     \subsection{Persistence}
+    There appears to be no persistence that I could find. Some registry keys are set which persist, but the malware does not to be running on reboot. I tried using volatility on reboot to see any process was un-listed, but I could not find any. Network traffic appears to stop as well.
     \subsection{De-obfuscation}
+    Deobfuscation was done mainly by using x32dbg by stepping through. I was able to better understand the program control flow and any library functions used. 
     \subsection{Anti-debugging}
     The program displayed the message box below due calling \textit{UnhandledExceptionFilter}. This function "\textit{passes unhandled exceptions to the debugger, if the process is being debugged. Otherwise, it optionally displays an Application Error message box and causes the exception handler to be executed}"\Cite{unhandledFilter}.
     \begin{figure}[H]
@@ -138,6 +211,35 @@ ivanovmichael@ufl.edu}
     \end{figure}
     \pagebreak
     \section{Indicators of Compromise}
+    \subsection{Host Indicators}
+    \begin{itemize}
+        \item sample3.dll: 3AC8BFD8DA5D3C4789D1F5D26E0E082B
+    \end{itemize}
+    \subsection{Network Indicators}
+    Network activity to the following:
+    \begin{itemize}
+        \item 51.75.33.122:https
+        \item 186.250.45.5:http
+        \item 168.119.39.118:https
+        \item 85.214.67.203:8080
+    \end{itemize}
+    \subsection{Yara Rule}
+    \begin{verbatim}
+    import "pe"
+    
+    rule sample3 {
+        meta:
+            author = "Michael Ivanov"
+        strings:
+            $s1 = "olefact.cpp" fullword ascii
+            $s2 = "DllRegisterServer" fullword ascii
+            $s3 = "DllUnregisterServer" fullword ascii
+            $s4 = "DllUnregisterForms" fullword ascii
+        condition:
+            uint16(0) == 0x5A4D
+            and $s1 and $s2 and $s3 and $s4
+    }
+    \end{verbatim}
     \pagebreak
     \printbibliography
 \end{document}
