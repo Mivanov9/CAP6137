@@ -1,8 +1,8 @@
 \documentclass{article}
-\usepackage{url}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{biblatex}
+\usepackage{xurl}
 \usepackage{listings}
 \usepackage{xcolor}
 
@@ -22,7 +22,7 @@
     breaklines=true,                 
     captionpos=b,                    
     keepspaces=true,                 
-    numbers=left,                    
+    numbers=none,                    
     numbersep=5pt,                  
     showspaces=false,                
     showstringspaces=false,
@@ -44,6 +44,7 @@ ivanovmichael@ufl.edu}
     \maketitle
     \pagebreak
     \section{Executive Summary}
+    This piece of malware is a \textit{Remote Access Trojan (RAT)} keylogger. Executing this malware will cause the following directory to be created \url{C:\Users\malware\AppData\Roaming\Logs}. Inside this directory files with the current date will be created. These files are encoded to disguise any intent and are updated every time the user presses any keys. Through static and dynamic analysis I was able to find the encoding methods to decode the logged messages. Decoding these files reveals the malware's purpose. The malware records the current active window's name with any keys pressed while the window is in focus. This allows the malware to potentially gather information on any confidential information the user types into a document or browser. Analyzing network traffic reveals two address the malware attempts to connect to: \url{masonchill.jumpingcrab.com} and \url{masonchill.dynamic-dns.net}.
     \pagebreak
     \section{Static Analysis}
     \subsection{MD5 Hashes}
@@ -168,6 +169,26 @@ decodedFile.close()
         \item \url{masonchill.dynamic-dns.net}
     \end{itemize}
     \subsection{Yara Rule}
+    \begin{lstlisting}
+import "pe"
+
+rule netWireRAT {
+    meta:
+        author = "Michael Ivanov"
+    strings:
+        $s1 = "User Data" fullword ascii
+        $s2 = "GetRawInputData" fullword ascii
+        $s3 = "GetKeyState" fullword ascii
+    condition:
+    uint16(0) == 0x5A4D
+    and $s1 and $s2 and $s3
+    and pe.imports("ws2_32.dll") 
+    and pe.imports("crypt32.dll") 
+    and pe.imports("user32.dll", "EnumWindows") 
+    and pe.imports("user32.dll", "GetForegroundWindow") 
+    and pe.imports("user32.dll", "GetDesktopWindow")  
+}
+    \end{lstlisting}
     \pagebreak
     \printbibliography
 \end{document}
