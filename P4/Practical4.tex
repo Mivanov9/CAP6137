@@ -3,6 +3,34 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{biblatex}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 \addbibresource{ref.bib}
 \graphicspath{{./images}}
 \title{Analysis of NetWireRAT\\Practical Assignment 4\\Malware Reverse Engineering \\
@@ -20,7 +48,7 @@ ivanovmichael@ufl.edu}
     \section{Static Analysis}
     \subsection{MD5 Hashes}
     \begin{itemize}
-        \item NetWireRat.exe: 1D7FFEE59EA65A8E19F28BAF72F581F4
+        \item NetWireRat.exe: 1D7FFEE59EA65A8E19F28BAF72F581F4 \Cite{malwareSample}
     \end{itemize}
     \subsection{Compilation date}
     \begin{itemize}
@@ -58,11 +86,57 @@ ivanovmichael@ufl.edu}
     \end{itemize}
     \subsection{Program Sections}
     Nothing suspicious found with the program sections.
-    \subsection{Anti-disassembly}
-    \subsection{Anti-debugging}
+    \subsection{Anti-disassembly and anti-debugging}
+    No anti-disassembly or anti-debugging was found.
+    \subsection{Obfuscation}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{ghidra-encode.png}
+        \caption{The code responsible for encoding the tracked key presses}
+        \label{fig:encode}
+    \end{figure}
+    \subsection{Interesting disassembly functions}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{keyboard-function.png}
+        \caption{Ghidra disassembly of where the RAT records key presses}
+    \end{figure}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{ghidra-writeFile.png}
+        \caption{Ghidra disassembly of where the RAT writes its log}
+    \end{figure}
     \pagebreak
     \section{Dynamic Analysis}
     \subsection{Interesting behaviors}
+    Executing the malware it will create a Logs directory and a file with the current date. When typing in any application this log file will be updated with encoded data to disguise its purpose.
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{encoded-logs.png}
+        \caption{Encoded data created by the malware}
+    \end{figure}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{procmon-logs.png}
+        \caption{Procmon showing the creation and modification of the log file}
+    \end{figure}
+    \pagebreak
+    By analyzing the encoding function in figure \ref{fig:encode}, a decoding script can be created to reverse the process.
+    \begin{lstlisting}[language=Python]
+encodedFile = open('encode.txt', 'r')
+decodedFile = open('decode.txt', 'w')
+while True:
+    c = encodedFile.read(1)
+    if not c:
+        break
+    c = ord(c)
+    c -= int(0x24)
+    c %= 256
+    c ^= int(0x9d)
+    decodedFile.write(chr(c))
+encodedFile.close()
+decodedFile.close()
+    \end{lstlisting}
+    Executing the script above on the log file gives us the decoded text.     The log contains the active window, the date and time, and any keys pressed.
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{decoded-logs2.png}
+        \caption{The decoded log file after executing the python script}
+    \end{figure}
     \subsection{Networking activity}
     DNS Resolutions:
     \begin{itemize}
@@ -78,8 +152,21 @@ ivanovmichael@ufl.edu}
         \item \url{C:\Users\malware\AppData\Roaming\Logs\20-04-2022}: file with today's date is created and modified multiple times.
     \end{itemize}
     \subsection{Persistence}
+    No persistence mechanisms have been observed. The log file persists between reboots, but no longer updates on key presses. Also, network activity stops on reboot as well.
     \pagebreak
     \section{Indicators of Compromise}
+    \subsection{Host Indicators}
+    The following directory and file:
+    \begin{itemize}
+        \item \url{C:\Users\malware\AppData\Roaming\Logs}
+        \item \url{C:\Users\malware\AppData\Roaming\Logs\%date%}
+    \end{itemize}
+    \subsection{Network Indicators}
+    The following dns resolutions:
+    \begin{itemize}
+        \item \url{masonchill.jumpingcrab.com}
+        \item \url{masonchill.dynamic-dns.net}
+    \end{itemize}
     \subsection{Yara Rule}
     \pagebreak
     \printbibliography
