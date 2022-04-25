@@ -138,12 +138,24 @@ decodedFile.close()
         \includegraphics[width=\textwidth]{decoded-logs2.png}
         \caption{The decoded log file after executing the python script}
     \end{figure}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{x32-keys.png}
+        \caption{Using x32dbg the malware is shown to look for non-printable keys as well}
+    \end{figure}
     \subsection{Networking activity}
     DNS Resolutions:
     \begin{itemize}
         \item \url{masonchill.jumpingcrab.com}
         \item \url{masonchill.dynamic-dns.net}
     \end{itemize}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{fakedns.png}
+        \caption{Remnux running fakedns while malware is running}
+    \end{figure}
+    \begin{figure}[H]
+        \includegraphics[width=\textwidth]{wireshark.png}
+        \caption{DNS response shown in Wireshark}
+    \end{figure}
     \subsection{Registry keys created or modified}
     No registry keys were created or modified.
     \subsection{Files created or modified}
